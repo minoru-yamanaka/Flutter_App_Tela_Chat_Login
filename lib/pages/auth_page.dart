@@ -19,7 +19,7 @@ class _AuthPageState extends State<AuthPage> {
     setState(() => _isLoading = true);
 
     //print('AuthPage');
-    setState(() => _isLoading = false); // Ativação do loading
+    // setState(() => _isLoading = false); // Ativação do loading
   }
 
   @override
