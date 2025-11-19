@@ -1,5 +1,8 @@
 //customizacao dos campos
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application_app_chat/components/user_image_picker.dart';
 import 'package:flutter_application_app_chat/models/auth_form_data.dart';
 
 class AuthForm extends StatefulWidget {
@@ -15,10 +18,34 @@ class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>(); // acessando dados do formulário
   final _formData = AuthFormData(); // usando a classe que foi criada
 
+  /*
+  Essa Função será chamada quando o usuário escolher uma imagem 
+  Ela guardará a imagem dentro do _formData.   
+  */
+
+  void _handleImagePick(File image) {
+    _formData.image = image;
+  }
+
+  void _showErro(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  }
+
   void _submit() {
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) return;
     // _formKey.currentState?.validate();
+
+    // esta condição dará erro caso a image, não for selecionada
+    if (_formData.image == null && _formData.isSignup) {
+      return _showErro('Image, não selecionada');
+    }
+
     widget.onSubmit(_formData);
   }
 
@@ -33,23 +60,24 @@ class _AuthFormState extends State<AuthForm> {
           child: Column(
             children: [
               if (_formData.isSignup)
-                TextFormField(
-                  key: const ValueKey('name'),
-                  initialValue: _formData.name,
-                  onChanged: (name) => _formData.name = name,
-                  decoration: const InputDecoration(labelText: 'Nome'),
-                  // validação ao seu campo "Nome".
-                  validator: (value) {
-                    // 1. O valor pode ser nulo ou vazio?
-                    final name = value ?? ''; // Garante que não é nulo
-                    // 2. Regra: Não pode ser vazio e deve ter 4+ caracteres
-                    if (name.trim().length < 4) {
-                      return 'Nome deve ter no mínimo 4 caracteres.';
-                    }
-                    // 3. Se passou, retorne null (válido)
-                    return null;
-                  },
-                ),
+                UserImagePicker(onImagePick: _handleImagePick),
+              TextFormField(
+                key: const ValueKey('name'),
+                initialValue: _formData.name,
+                onChanged: (name) => _formData.name = name,
+                decoration: const InputDecoration(labelText: 'Nome'),
+                // validação ao seu campo "Nome".
+                validator: (value) {
+                  // 1. O valor pode ser nulo ou vazio?
+                  final name = value ?? ''; // Garante que não é nulo
+                  // 2. Regra: Não pode ser vazio e deve ter 4+ caracteres
+                  if (name.trim().length < 4) {
+                    return 'Nome deve ter no mínimo 4 caracteres.';
+                  }
+                  // 3. Se passou, retorne null (válido)
+                  return null;
+                },
+              ),
               TextFormField(
                 key: const ValueKey('email'),
                 initialValue: _formData.email,

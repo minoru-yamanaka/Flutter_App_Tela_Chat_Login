@@ -1,15 +1,62 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:ui';
 
-class MyWidget extends StatefulWidget {
-  const MyWidget({super.key});
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+class UserImagePicker extends StatefulWidget {
+  final void Function(File image) onImagePick;
+
+  const UserImagePicker({super.key, required this.onImagePick});
 
   @override
-  State<MyWidget> createState() => _MyWidgetState();
+  State<UserImagePicker> createState() => _UserImagePicker();
 }
 
-class _MyWidgetState extends State<MyWidget> {
+class _UserImagePicker extends State<UserImagePicker> {
+  File? _image;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 150,
+    );
+    if (pickedImage != null) {
+      setState(() {
+        _image = File(pickedImage.path);
+      });
+      widget.onImagePick(_image!);
+    }
+  }
+
+  /*
+  ImagePicker() cria o objeto responsável por abrir a galeria 
+  pickImage() abre a galeria e guarda o usuario escolher a imagem 
+  */
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 40,
+          backgroundColor: Colors.grey,
+          backgroundImage: _image != null ? FileImage(_image!) : null,
+        ),
+        TextButton(
+          onPressed: _pickImage,
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.image),
+              SizedBox(width: 10),
+              Text('Adicionar Imagem'),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
